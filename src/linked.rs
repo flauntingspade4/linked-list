@@ -1,5 +1,16 @@
 use std::{cmp::PartialEq, fmt::Debug};
 
+pub fn generate_head<T>(items: Vec<T>) -> LinkedHead<T>
+where
+    T: PartialEq + Debug,
+{
+    let mut head = LinkedHead::new();
+    for item in items {
+        head.add_new_pointer(item);
+    }
+    head
+}
+
 ///The head of a linked list
 #[cfg_attr(debug_assertions, derive(Debug, PartialEq))]
 pub struct LinkedHead<T>
@@ -28,10 +39,10 @@ where
         self.pointer = Some(new_node);
         self.len += 1;
     }
-    ///Returns either a refrence to the first link in the list containing the data, and nothing if none contain said data
-    pub fn find(&self, to_find: T) -> Option<&LinkedList<T>> {
+    ///Returns either a refrence to the first link in the list containing the data, and nothing if none contain said data-also returns the index the data's found at
+    pub fn find(&self, to_find: T) -> Option<(&LinkedList<T>, usize)> {
         match &self.pointer {
-            Some(pointer) => pointer.find(to_find),
+            Some(pointer) => pointer.find(to_find, 0),
             None => None,
         }
     }
@@ -133,13 +144,13 @@ where
             }
         }
     }
-    ///Will return Some(&self) if the current data is the same as the requested data, and none if there's none in the list
-    pub fn find(&self, to_find: T) -> Option<&Self> {
+    fn find(&self, to_find: T, index: usize) -> Option<(&Self, usize)> {
+        //Will return Some(&self) if the current data is the same as the requested data, and none if there's none in the list-also returns index
         if self.data == to_find {
-            return Some(&self);
+            return Some((self, index));
         }
         match &self.pointer {
-            Some(pointer) => Some(pointer.find(to_find).unwrap()),
+            Some(pointer) => pointer.find(to_find, index + 1),
             None => None,
         }
     }
@@ -160,12 +171,12 @@ where
         }
     }
     fn get(&self, current_index: usize, index: usize) -> &Self {
-        //Returns a refrence to the link at the given index
+		//Returns a refrence to the link at the given index
         if current_index == index {
             self
         } else {
             match &self.pointer {
-                Some(pointer) => pointer.get(current_index, index),
+                Some(pointer) => pointer.get(current_index + 1, index),
                 None => panic!("Tried to index item out of list"),
             }
         }
@@ -176,7 +187,7 @@ where
             self
         } else {
             match &mut self.pointer {
-                Some(pointer) => pointer.get_mut(current_index, index),
+                Some(pointer) => pointer.get_mut(current_index + 1, index),
                 None => panic!("Tried to index item out of list"),
             }
         }
