@@ -6,7 +6,7 @@ where
 {
     let mut head = LinkedHead::new();
     for item in items {
-        head.add_new_pointer(item);
+        head.add_new(item);
     }
     head
 }
@@ -39,13 +39,6 @@ where
         self.pointer = Some(new_node);
         self.len += 1;
     }
-    ///Returns either a refrence to the first link in the list containing the data, and nothing if none contain said data-also returns the index the data's found at
-    pub fn find(&self, to_find: T) -> Option<(&LinkedList<T>, usize)> {
-        match &self.pointer {
-            Some(pointer) => pointer.find(to_find, 0),
-            None => None,
-        }
-    }
     ///Sets the data of the list at a given index, panicking if that index is out of bounds
     pub fn set_data(&mut self, index: usize, data: T) {
         match &mut self.pointer {
@@ -53,8 +46,15 @@ where
             None => {}
         }
     }
+    ///Returns either a refrence to the first link in the list containing the data, and nothing if none contain said data-also returns the index the data's found at
+    pub fn find(&self, to_find: T) -> Option<(&LinkedList<T>, usize)> {
+        match &self.pointer {
+            Some(pointer) => pointer.find(to_find, 0),
+            None => None,
+        }
+    }
     ///Adds a new pointer onto the end, with the specified data 'new_data'
-    pub fn add_new_pointer(&mut self, new_data: T) {
+    pub fn add_new(&mut self, new_data: T) {
         match &mut self.pointer {
             Some(pointer) => {
                 pointer.try_set(new_data);
@@ -133,6 +133,14 @@ where
     pub fn set_data(&mut self, data: T) {
         self.data = data;
     }
+    ///Gets a refrence to the data contained in the link
+    pub fn get_data(&self) -> &T {
+        &self.data
+    }
+    ///Gets a mutable refrence to the data contained in the link
+    pub fn get_data_mut(&mut self) -> &mut T {
+        &mut self.data
+    }
     ///Checks if the link's index is the requested index, if so it'll set the data to the given data. If the requested index is out of bounds, it'll panic
     fn set_data_indexed(&mut self, current_index: usize, index: usize, data: T) {
         if current_index == index {
@@ -154,14 +162,6 @@ where
             None => None,
         }
     }
-    ///Gets a refrence to the data contained in the link
-    pub fn get_data(&self) -> &T {
-        &self.data
-    }
-    ///Gets a mutable refrence to the data contained in the link
-    pub fn get_data_mut(&mut self) -> &mut T {
-        &mut self.data
-    }
     fn try_set(&mut self, new_data: T) {
         //Checks if the current pointer is None, and if so will change the current pointer to a new
         //item, based off the new data.
@@ -171,7 +171,7 @@ where
         }
     }
     fn get(&self, current_index: usize, index: usize) -> &Self {
-		//Returns a refrence to the link at the given index
+        //Returns a refrence to the link at the given index
         if current_index == index {
             self
         } else {
